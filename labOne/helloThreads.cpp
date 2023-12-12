@@ -1,39 +1,54 @@
+/*! \file helloThreads.cpp
+    \brief A documented file.
+
+
+*/
+
 #include "Semaphore.h"
 #include <iostream>
 #include <thread>
 #include <unistd.h>
 
+using namespace std;
+
 /*! displays a message first*/
 void taskOne(std::shared_ptr<Semaphore> theSemaphore, int delay){
   sleep(delay);
-  std::cout <<"I ";
-  std::cout << "must ";
-  std::cout << "print ";
-  std::cout << "first"<<std::endl;
+  cout <<"I ";
+  cout << "must ";
+  cout << "print ";
+  cout << "first"<<std::endl;
   //tell taskTwo to start now
+  theSemaphore->Signal();
 }
 
 /*! displays a message second*/
 void taskTwo(std::shared_ptr<Semaphore> theSemaphore){
   //wait here until taskOne finishes...
-  std::cout <<"This ";
-  std::cout << "will ";
+  theSemaphore->Wait();
+  cout <<"This ";
+  cout << "will ";
   sleep(5);
-  std::cout << "appear ";
-  std::cout << "second"<<std::endl;
+  cout << "appear ";
+  cout << "second"<<std::endl;
 }
 
-
 int main(void){
-  std::thread threadOne, threadTwo;
-  std::shared_ptr<Semaphore> sem( new Semaphore);
-  sem->Signal();sem->Wait();//these serve no purpose
+  // Declare two threads
+  thread threadOne, threadTwo;
+  // Create shared semaphore object
+  shared_ptr<Semaphore> sem( new Semaphore);
+
+  sem->Signal();
+  sem->Wait();//these serve no purpose
+
   /**< Launch the threads  */
   int taskOneDelay=5;
-  threadOne=std::thread(taskTwo,sem);
-  threadTwo=std::thread(taskOne,sem,taskOneDelay);
-  std::cout << "Launched from the main\n";
-   /**< Wait for the threads to finish */
+  threadOne=thread(taskTwo,sem);
+  threadTwo=thread(taskOne,sem,taskOneDelay);
+  cout << "Launched from the main\n";
+
+  /**< Wait for the threads to finish */
   threadOne.join();
   threadTwo.join();
   return 0;
